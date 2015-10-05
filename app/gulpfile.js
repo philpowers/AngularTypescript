@@ -14,9 +14,9 @@ var gulp = require('gulp'),
     karmaServer = require('karma').Server,
     Config = require('./gulpfile.config');
 
-var testBuildTasks = ['ts-lint', 'compile-ts', 'run-tests'];
-var debugBuildTasks = ['ts-lint', 'compile-ts'];
-var prodBuildTasks = ['ts-lint', 'compile-ts' ];
+var testBuildTasks = ['ts-lint', 'compile-tests', 'run-tests'];
+var debugBuildTasks = ['ts-lint', 'compile-app'];
+var prodBuildTasks = ['ts-lint', 'compile-app', 'minify-js' ];
 
 // Supported environments:  'test', 'debug', 'production'
 var environment = function() {
@@ -25,6 +25,7 @@ var environment = function() {
   }
 
   switch(process.argv[2]) {
+    case 'dev':
     case 'test':
     case 'debug':
     case 'production':
@@ -50,9 +51,15 @@ function configureBuild() {
   config = new Config(environment);
 
   switch(environment) {
-    case 'test':
+
+    case 'dev':
       buildTasks = testBuildTasks;
       buildTasksRet = ['check-tsd'].concat(buildTasks).concat(['watch']);
+      break;
+
+    case 'test':
+      buildTasks = testBuildTasks;
+      buildTasksRet = ['check-tsd'].concat(buildTasks);
       break;
 
     case 'debug':
@@ -71,7 +78,7 @@ function configureBuild() {
 
 
 /**
- * Verifies that we have all the external typing files (*.tsd)
+ * Verifies that we have all the external typing files (*.d.ts)
  */
 var tsdChecked = false;
 gulp.task('check-tsd', function (callback) {
@@ -82,9 +89,11 @@ gulp.task('check-tsd', function (callback) {
       return;
     }
 
+    gutil.log('Reinstalling external TypeScript definitions.');
+
     tsd({
         command: 'reinstall',
-        config: './tsd.json'
+        config: './ts/tsd.json'
     }, callback);
 
     tsdChecked = true;
@@ -101,9 +110,9 @@ gulp.task('ts-lint', ['check-tsd'], function () {
 });
 
 /**
- * Compile TypeScript into single, combined JavaScript file and create minified version
+ * Compile TypeScript app into single, combined JavaScript
  */
-gulp.task('compile-ts', ['check-tsd'], function () {
+gulp.task('compile-app', ['check-tsd'], function () {
     var tsProject = ts.createProject(config.typeScriptProjectFile);
 
     var tsResult = tsProject.src()
@@ -119,9 +128,28 @@ gulp.task('compile-ts', ['check-tsd'], function () {
 });
 
 /**
+ * Compile TypeScript tests into single, combined JavaScript
+ */
+gulp.task('compile-app', ['check-tsd'], function () {
+    var tsProject = ts.createProject(config.typeScriptProjectFile);
+
+    var tsResult = tsProject.src()
+      .pipe(sourcemaps.init())
+      .pipe(ts(tsProject));
+
+    tsResult.dts
+      .pipe(gulp.dest('./scripts/'));
+
+    return tsResult.js
+      .pipe(sourcemaps.write('.'))
+      .pipe(gulp.dest('./scripts/'));
+});
+
+
+/**
  * Minify post-transpiled Javascript file
  */
-gulp.task('minify-js', ['compile-ts'], function () {
+gulp.task('minify-js', ['compile-app'], function () {
     return gulp.src(config.tsOutputCombinedFilePath)
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(uglify())
@@ -133,7 +161,7 @@ gulp.task('minify-js', ['compile-ts'], function () {
 /**
  * Run unit tests from post-transpiled Javascript file
  */
-gulp.task('run-tests', ['compile-ts'], function (done) {
+gulp.task('run-tests', ['compile-app'], function (done) {
   new karmaServer({
     configFile: __dirname + '/karma.conf.js',
     singleRun: true

@@ -7,11 +7,12 @@ module AngularTs {
 
 		public displayMsg: string = null;
 
-		public static $inject = [ '$scope' ];
-		constructor(private $scope: ng.IScope) {
+		public static $inject = [ '$scope', '' ];
+		constructor(private $scope: ng.IScope, windowPinger: WindowPinger, $window: ng.IWindowService) {
 			$scope['viewModel'] = this;
 
-			this.displayMsg = 'Hello from Angular/TypeScript!';
+			windowPinger.doPing();
+			this.displayMsg = 'Hello from Angular/TypeScript! Ping? ' + $window['tsPing'];
 		}
 	}
 }

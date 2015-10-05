@@ -16,6 +16,9 @@
     },
     "jasmine/jasmine.d.ts": {
       "commit": "98d3168c2c570352a3a7393788e2ec9fbb08ade6"
+    },
+    "angularjs/angular-mocks.d.ts": {
+      "commit": "8ec432ab1bacc79412d322f7c64c00f2cf73e22f"
     }
   }
 }
