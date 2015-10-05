@@ -1,7 +1,9 @@
 # AngularTypescript
-Fully-functional, minimal seed project for Angular 1.x using TypeScript
+Fully-functional, minimal seed project for Angular 1.x using TypeScript. 
 
-# Features
+Features a Gulp-based build process that automates the development as much as possible.
+
+## Features
 1. [TypeScript](http://typescriptlang.org) for [Angular 1.x](https://angularjs.org/) development
 2. Unit Tests using [Jasmine](http://jasmine.github.io/).
 3. Support for building in Test, Debug or Production modes.
@@ -12,7 +14,7 @@ Fully-functional, minimal seed project for Angular 1.x using TypeScript
 8. [Angular UI Router](https://github.com/angular-ui/ui-router).
 
 
-# Installation
+## Installation
 
 1. Clone to your local machine.
 2. Run following commands from cloned directory (assumes you already have npm/NodeJS and Bower installed globally):
@@ -20,7 +22,7 @@ Fully-functional, minimal seed project for Angular 1.x using TypeScript
   - npm install
   - bower install
 
-# Building
+## Building
   - gulp <"test" | "debug" | "production">
     - No arguments to put into "test" (development) mode (auto-watch + unit tests enabled)
     - "debug" to create build intended for debugging (no minification, etc)
