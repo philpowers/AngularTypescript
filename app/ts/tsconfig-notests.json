@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "preserveConstEnums": true,
+        "out": "../scripts/app.js",
+        "sourceMap": true
+    },
+ 	"exclude": [ "tests" ]
+}

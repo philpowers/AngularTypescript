@@ -1,0 +1,10 @@
+{
+    "folders": [
+        {
+            "path": ".",
+            "follow_symlinks": true,
+            "folder_exclude_patterns": [".svn", ".git", ".hg", "CVS", "bin", "obj", "Debug", "Release", "binaries", "lib", "output", "BuildTools", "node_modules", "bower_components" ],
+            "file_exclude_patterns": ["*.js.map"]
+        }
+    ]
+}
