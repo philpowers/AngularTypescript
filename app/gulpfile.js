@@ -16,12 +16,12 @@ var gulp = require('gulp'),
 
 var testBuildTasks = ['ts-lint', 'compile-tests', 'run-tests'];
 var debugBuildTasks = ['ts-lint', 'compile-app'];
-var prodBuildTasks = ['ts-lint', 'compile-app', 'minify-js' ];
+var prodBuildTasks = ['ts-lint', 'compile-app', 'minify-app' ];
 
-// Supported environments:  'test', 'debug', 'production'
+// Supported environments:  'dev', 'test', 'debug', 'production'
 var environment = function() {
   if (process.argv.length < 3) {
-    return 'test';
+    return 'dev';
   }
 
   switch(process.argv[2]) {
@@ -84,7 +84,7 @@ var tsdChecked = false;
 gulp.task('check-tsd', function (callback) {
 
     if (tsdChecked) {
-      gutil.log('TSD files aleady checked for this session.');
+      //gutil.log('TSD files aleady checked for this session.');
       callback();
       return;
     }
@@ -104,7 +104,7 @@ gulp.task('check-tsd', function (callback) {
  * Lint all custom TypeScript files.
  */
 gulp.task('ts-lint', ['check-tsd'], function () {
-    return gulp.src(config.inputTypeScript)
+    return gulp.src(config.testsBuildInfo.tsInputFiles)
       .pipe(tslint())
       .pipe(tslint.report('prose'));
 });
@@ -113,7 +113,7 @@ gulp.task('ts-lint', ['check-tsd'], function () {
  * Compile TypeScript app into single, combined JavaScript
  */
 gulp.task('compile-app', ['check-tsd'], function () {
-    var tsProject = ts.createProject(config.typeScriptProjectFile);
+    var tsProject = ts.createProject(config.appBuildInfo.tsProjectFile);
 
     var tsResult = tsProject.src()
       .pipe(sourcemaps.init())
@@ -126,42 +126,46 @@ gulp.task('compile-app', ['check-tsd'], function () {
       .pipe(sourcemaps.write('.'))
       .pipe(gulp.dest('./scripts/'));
 });
-
-/**
- * Compile TypeScript tests into single, combined JavaScript
- */
-gulp.task('compile-app', ['check-tsd'], function () {
-    var tsProject = ts.createProject(config.typeScriptProjectFile);
-
-    var tsResult = tsProject.src()
-      .pipe(sourcemaps.init())
-      .pipe(ts(tsProject));
-
-    tsResult.dts
-      .pipe(gulp.dest('./scripts/'));
-
-    return tsResult.js
-      .pipe(sourcemaps.write('.'))
-      .pipe(gulp.dest('./scripts/'));
-});
-
 
 /**
  * Minify post-transpiled Javascript file
  */
-gulp.task('minify-js', ['compile-app'], function () {
-    return gulp.src(config.tsOutputCombinedFilePath)
+gulp.task('minify-app', ['compile-app'], function () {
+
+    var outputCombinedFilePath = config.tsOutputPath + '/' + config.appBuildInfo.outputCombinedName + '.js';
+    var minifyFileName = config.appBuildInfo.outputCombinedName + '.min.js';
+
+    return gulp.src(outputCombinedFilePath)
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(uglify())
-        .pipe(rename(config.tsOutputCombinedName + '.min.js'))
+        .pipe(rename(minifyFileName))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(config.tsOutputPath));
 });
 
 /**
+ * Compile TypeScript tests into single, combined JavaScript
+ */
+gulp.task('compile-tests', ['check-tsd'], function () {
+    var tsProject = ts.createProject(config.testsBuildInfo.tsProjectFile);
+
+    var tsResult = tsProject.src()
+      .pipe(sourcemaps.init())
+      .pipe(ts(tsProject));
+
+    tsResult.dts
+      .pipe(gulp.dest('./scripts/'));
+
+    return tsResult.js
+      .pipe(sourcemaps.write('.'))
+      .pipe(gulp.dest('./scripts/'));
+});
+
+
+/**
  * Run unit tests from post-transpiled Javascript file
  */
-gulp.task('run-tests', ['compile-app'], function (done) {
+gulp.task('run-tests', ['compile-tests'], function (done) {
   new karmaServer({
     configFile: __dirname + '/karma.conf.js',
     singleRun: true
@@ -185,7 +189,7 @@ gulp.task('clean-ts', function (cb) {
  * Watch TypeScript files for modification, re-run build tasks when detected
  */
 gulp.task('watch', function() {
-    gulp.watch(config.inputTypeScript, buildTasks);
+    gulp.watch(config.testsBuildInfo.tsInputFiles, buildTasks);
 });
 
 
@@ -194,6 +198,7 @@ gulp.task('watch', function() {
  */
 
 gulp.task('default', buildTasksRet);
+gulp.task('dev', buildTasksRet);
 gulp.task('test', buildTasksRet);
 gulp.task('debug', buildTasksRet);
 gulp.task('production', buildTasksRet);
