@@ -10,13 +10,17 @@ var gulp = require('gulp'),
     del = require('del'),
     rename = require('gulp-rename'),
     uglify = require('gulp-uglify'),
+    useref = require('gulp-useref'),
+    gulpif = require('gulp-if'),
+    minifyCss = require('gulp-minify-css'),
     gutil = require('gulp-util'),
     karmaServer = require('karma').Server,
     Config = require('./gulpfile.config');
 
+var devBuildTasks = ['ts-lint', 'compile-tests', 'run-tests', 'compile-app'];
 var testBuildTasks = ['ts-lint', 'compile-tests', 'run-tests'];
 var debugBuildTasks = ['ts-lint', 'compile-app'];
-var prodBuildTasks = ['ts-lint', 'compile-app', 'minify-app' ];
+var prodBuildTasks = ['ts-lint', 'compile-app', 'minify-app', 'package-app' ];
 
 // Supported environments:  'dev', 'test', 'debug', 'production'
 var environment = function() {
@@ -53,7 +57,7 @@ function configureBuild() {
   switch(environment) {
 
     case 'dev':
-      buildTasks = testBuildTasks;
+      buildTasks = devBuildTasks;
       buildTasksRet = ['check-tsd'].concat(buildTasks).concat(['watch']);
       break;
 
@@ -141,6 +145,46 @@ gulp.task('minify-app', ['compile-app'], function () {
         .pipe(rename(minifyFileName))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(config.tsOutputPath));
+});
+
+gulp.task('clean-dist', function (cb) {
+  gutil.log('clean-dist: enter');
+  var distFiles = [ './dist/**/*' ];
+
+  // delete the files
+  return del(distFiles, cb);
+});
+
+gulp.task('bundle-app', ['clean-dist', 'compile-app'], function() {
+    var assets = useref.assets();
+
+    return gulp.src('./*.html')
+        .pipe(assets)
+        .pipe(gulpif('*.js', uglify()))
+        .pipe(gulpif('*.css', minifyCss()))
+        .pipe(assets.restore())
+        .pipe(useref())
+        .pipe(gulp.dest('dist'));
+});
+
+/* - this is necessary for distributing/packaging Bootstrap
+gulp.task('copyfonts-app', ['clean-dist'], function() {
+    return gulp.src('./bower_components/bootstrap/dist/fonts/**.*') 
+        .pipe(gulp.dest('./dist/fonts'));
+ });
+*/
+
+gulp.task('copydeps-app', ['clean-dist'], function() {
+    var filesToCopy = [
+      './views/**/*'
+    ]
+
+    return gulp.src(filesToCopy, { base: './' })
+      .pipe(gulp.dest('dist'));
+});
+
+gulp.task('package-app', ['bundle-app', 'copydeps-app' /*, 'copyfonts-app' */], function() {
+  return gutil.noop();
 });
 
 /**

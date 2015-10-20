@@ -7,7 +7,7 @@ module AngularTs {
 
 		public displayMsg: string = null;
 
-		public static $inject = [ '$scope', '' ];
+		public static $inject = [ '$scope', 'windowPinger', '$window' ];
 		constructor(private $scope: ng.IScope, windowPinger: WindowPinger, $window: ng.IWindowService) {
 			$scope['viewModel'] = this;
 

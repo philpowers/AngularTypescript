@@ -39,3 +39,6 @@ bower_components
 **/scripts/*.js
 **/scripts/*.js.map
 typings
+
+# Distribution directory
+dist
