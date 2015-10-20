@@ -1,5 +1,5 @@
 # AngularTypescript
-Fully-functional, minimal seed project for Angular 1.x using TypeScript. 
+Fully-functional, minimal seed project for Angular 1.x using TypeScript.
 
 Features a Gulp-based build process that automates the development as much as possible.
 
@@ -12,6 +12,8 @@ Features a Gulp-based build process that automates the development as much as po
 6. Runs unit tests automatically using [Karma](http://karma-runner.github.io/).
 7. Gulp-based build with support for multiple build configurations and rebuilding on file changes - based on [Dan Wahlin's TypeScript Workflow](http://weblogs.asp.net/dwahlin/creating-a-typescript-workflow-with-gulp)
 8. [Angular UI Router](https://github.com/angular-ui/ui-router).
+9. Support for bundling all CSS and JavaScript files into separate "dist" directory for running on production servers using [gulp-useref](https://github.com/jonkemp/gulp-useref)
+10. Cache-busting support for bundled resources using [gulp-rev-all](https://github.com/smysnk/gulp-rev-all)
 
 
 ## Installation
@@ -27,4 +29,4 @@ Features a Gulp-based build process that automates the development as much as po
     - No arguments to put into "test" (development) mode (auto-watch + unit tests enabled)
     - "debug" to create build intended for debugging (no minification, etc)
     - "production" to create build intended for production.
-    
+

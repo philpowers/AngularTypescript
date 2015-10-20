@@ -13,6 +13,7 @@ var gulp = require('gulp'),
     useref = require('gulp-useref'),
     gulpif = require('gulp-if'),
     minifyCss = require('gulp-minify-css'),
+    RevAll = require('gulp-rev-all'),
     gutil = require('gulp-util'),
     karmaServer = require('karma').Server,
     Config = require('./gulpfile.config');
@@ -157,13 +158,15 @@ gulp.task('clean-dist', function (cb) {
 
 gulp.task('bundle-app', ['clean-dist', 'compile-app'], function() {
     var assets = useref.assets();
+    var revAll = new RevAll({ dontRenameFile: [/^\/favicon.ico$/g, '.html'] });
 
-    return gulp.src('./*.html')
+    return gulp.src('./index.html')
         .pipe(assets)
         .pipe(gulpif('*.js', uglify()))
         .pipe(gulpif('*.css', minifyCss()))
         .pipe(assets.restore())
         .pipe(useref())
+        .pipe(revAll.revision())
         .pipe(gulp.dest('dist'));
 });
 
